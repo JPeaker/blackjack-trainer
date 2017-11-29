@@ -7,5 +7,6 @@ export default {
   rules: {
     numberOfDecks: 8
   },
-  shoe: List()
+  shoe: List(),
+  shoeComplete: true
 }
