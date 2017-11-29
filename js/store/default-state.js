@@ -1,6 +1,11 @@
+import { List } from 'immutable';
+
 export default {
-  playerHand: [],
-  dealerHand: [],
+  playerHand: List(),
+  dealerHand: List(),
   bank: 10000,
-  rules: {}
+  rules: {
+    numberOfDecks: 8
+  },
+  shoe: List()
 }

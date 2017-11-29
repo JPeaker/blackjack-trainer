@@ -1,18 +1,17 @@
 import CardUtils from '../card';
+import { List } from 'immutable';
 
 it('generates deck correctly', () => {
   const deck = CardUtils.generateDeck();
-  expect(deck.length).toEqual(52);
+  expect(deck.size).toEqual(52);
 
   const rankCounter = new Array(13).fill(0);
   const suitCounter = new Array(4).fill(0);
 
-  for (var cardIndex = 0; cardIndex < deck.length; cardIndex++) {
-    const card = deck[cardIndex];
-
+  deck.forEach((card) => {
     rankCounter[CardUtils.ranks.indexOf(card.rank)] += 1;
     suitCounter[CardUtils.suits.indexOf(card.suit)] += 1;
-  }
+  });
 
   // Each rank should appear 4 times
   for (var rankIndex = 0; rankIndex < rankCounter.length; rankIndex++) {
@@ -26,8 +25,9 @@ it('generates deck correctly', () => {
 });
 
 // Assuming generate deck works correctly, we need only check the number of cards here
+// But generateShoe gives an immutable List, so check the size
 it('generates shoe correctly', () => {
   for (var numberOfShoes = 1; numberOfShoes < 4; numberOfShoes++) {
-    expect(CardUtils.generateShoe(numberOfShoes).length).toEqual(numberOfShoes * 52);
+    expect(CardUtils.generateShoe(numberOfShoes).size).toEqual(numberOfShoes * 52);
   }
 });

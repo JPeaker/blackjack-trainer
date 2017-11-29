@@ -1,3 +1,5 @@
+import { List } from 'immutable';
+
 export default class CardUtils {
   static get ranks() {
     return ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
@@ -8,12 +10,15 @@ export default class CardUtils {
   }
 
   static shuffle(list) {
-    for (let i = list.length - 1; i > 0; i--) {
+    let newList = list;
+    for (let i = list.size - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [list[i], list[j]] = [list[j], list[i]];
+        const tempVar = newList.get(i);
+        newList = newList.set(i, newList.get(j));
+        newList = newList.set(j, tempVar);
     }
 
-    return list;
+    return newList;
   }
 
   static generateDeck() {
@@ -24,11 +29,11 @@ export default class CardUtils {
       }
     }
 
-    return newDeck;
+    return List(newDeck);
   }
 
   static generateShoe(numberOfDecks) {
-    var newShoe = [];
+    let newShoe = List();
     for (var i = 0; i < numberOfDecks; i++) {
       newShoe = newShoe.concat(CardUtils.generateDeck());
     }
