@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import Immutable from 'immutable';
 
 import Hand from './hand.jsx';
+import HandUtils from './utils/hand';
 import { drawPlayerCard, initializeShoe } from './store/actions';
 
 class Game extends React.Component {
@@ -28,9 +29,8 @@ class Game extends React.Component {
   render() {
     return (
       <div>
-        <Hand cards={this.props.shoe} />
-        <span>HELLO JOSH</span>
         <Hand cards={this.props.playerHand} />
+        <span>{HandUtils.getHandValue(this.props.playerHand)}</span>
         <div onClick={this.props.drawCard}>Draw Card</div>
       </div>
     );
