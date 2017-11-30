@@ -9,6 +9,43 @@ export default class CardUtils {
     return ['clubs', 'diamonds', 'hearts','spades'];
   }
 
+  // If the suit is unspecified, just go with hearts, as it doesn't matter
+  static generateCard(rank, suit) {
+    if (CardUtils.ranks.indexOf(rank) === -1) {
+      throw new Error('Invalid card rank');
+    }
+
+    if (suit === undefined) {
+      return {
+        rank,
+        suit: 'spades'
+      };
+    }
+
+    if (CardUtils.suits.indexOf(suit) === -1) {
+      throw new Error('Invalid card suit');
+    }
+
+    return { rank, suit };
+  }
+
+  static getCardValue(card) {
+    if (CardUtils.ranks.indexOf(card.rank) < 0) {
+      throw new Error('Invalid card rank');
+    }
+
+    switch (card.rank) {
+      case 'A':
+        return 11;
+      case 'J':
+      case 'Q':
+      case 'K':
+        return 10;
+      default:
+        return Number(card.rank);
+    }
+  }
+
   static shuffle(list) {
     let newList = list;
     for (let i = list.size - 1; i > 0; i--) {
@@ -25,7 +62,7 @@ export default class CardUtils {
     const newDeck = [];
     for (var rank = 0; rank < CardUtils.ranks.length; rank++) {
       for (var suit = 0; suit < CardUtils.suits.length; suit++) {
-        newDeck.push({ rank: CardUtils.ranks[rank], suit: CardUtils.suits[suit] });
+        newDeck.push(CardUtils.generateCard(CardUtils.ranks[rank], CardUtils.suits[suit]));
       }
     }
 
