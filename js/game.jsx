@@ -29,9 +29,10 @@ class Game extends React.Component {
   render() {
     return (
       <div>
-        <Hand cards={this.props.playerHand} />
-        <span>{HandUtils.getHandValue(this.props.playerHand)}</span>
+        <div>{HandUtils.getHandValue(this.props.playerHand)}</div>
+        <div>{HandUtils.isBlackjack(this.props.playerHand).toString()}</div>
         <div onClick={this.props.drawCard}>Draw Card</div>
+        <Hand cards={this.props.playerHand} />
       </div>
     );
   }

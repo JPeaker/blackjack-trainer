@@ -2,17 +2,29 @@ import CardUtils from '../card';
 import HandUtils from '../hand';
 import { List } from 'immutable';
 
+describe('generateHand()', () => {
+  it('generates empty hand', () => {
+    expect(HandUtils.generateHand(List())).toEqual(List());
+  });
+
+  it('generates single card hand', () => {
+    expect(HandUtils.generateHand(List(['5']))).toEqual(List([CardUtils.generateCard('5')]));
+  });
+
+  it('generates multiple card hand', () => {
+    expect(
+      HandUtils.generateHand(List(['2', '3', 'A']))
+    ).toEqual(
+      List([CardUtils.generateCard('2'), CardUtils.generateCard('3'), CardUtils.generateCard('A')])
+    );
+  });
+});
+
 const expectMaxHandValueOfToBe = (listOfRanks, toBe) => {
   expect(
-    HandUtils.getMaxHandValue(listOfRanks.map((rank) => CardUtils.generateCard(rank)))
+    HandUtils.getMaxHandValue(List(listOfRanks.map((rank) => CardUtils.generateCard(rank))))
   ).toEqual(toBe);
 }
-
-const expectHandValueOfToBe = (listOfRanks, toBe) => {
-  expect(
-    HandUtils.getHandValue(listOfRanks.map((rank) => CardUtils.generateCard(rank)))
-  ).toEqual(toBe);
-};
 
 describe('getMaxHandValue()', () => {
   it('values empty hand as 0', () => {
@@ -39,6 +51,12 @@ describe('getMaxHandValue()', () => {
   });
 });
 
+const expectHandValueOfToBe = (listOfRanks, toBe) => {
+  expect(
+    HandUtils.getHandValue(List(listOfRanks.map((rank) => CardUtils.generateCard(rank))))
+  ).toEqual(toBe);
+};
+
 describe('getHandValue()', () => {
   it('values empty hand', () => {
     expectHandValueOfToBe([], 0);
@@ -63,5 +81,41 @@ describe('getHandValue()', () => {
     expectHandValueOfToBe(['A', 'K'], 21);
     expectHandValueOfToBe(['A', '4', 'A'], 16);
     expectHandValueOfToBe(['5', 'A', 'A', 'A'], 18);
+    expectHandValueOfToBe(['A', '6', '6', '5'], 18);
+  });
+});
+
+const expectIsBlackjackToBe = (hand, isBlackjack) => {
+  expect(HandUtils.isBlackjack(List(HandUtils.generateHand(hand)))).toEqual(isBlackjack);
+};
+
+describe('isBlackjack()', () => {
+  it('identifies blackjack', () => {
+    expectIsBlackjackToBe(['A', '10'], true);
+    expectIsBlackjackToBe(['A', 'J'], true);
+    expectIsBlackjackToBe(['A', 'Q'], true);
+    expectIsBlackjackToBe(['A', 'K'], true);
+    expectIsBlackjackToBe(['10', 'A'], true);
+    expectIsBlackjackToBe(['J', 'A'], true);
+    expectIsBlackjackToBe(['Q', 'A'], true);
+    expectIsBlackjackToBe(['K', 'A'], true);
+  });
+
+  it('identifies non-blackjack', () => {
+    expectIsBlackjackToBe([], false);
+    expectIsBlackjackToBe(['4'], false);
+    expectIsBlackjackToBe(['A'], false);
+    expectIsBlackjackToBe(['J'], false);
+    expectIsBlackjackToBe(['Q'], false);
+    expectIsBlackjackToBe(['K'], false);
+    expectIsBlackjackToBe(['10'], false);
+    expectIsBlackjackToBe(['10', '10'], false);
+    expectIsBlackjackToBe(['10', 'J'], false);
+    expectIsBlackjackToBe(['10', 'K'], false);
+    expectIsBlackjackToBe(['A', '9'], false);
+    expectIsBlackjackToBe(['A', '2'], false);
+    expectIsBlackjackToBe(['4', '7'], false);
+    expectIsBlackjackToBe(['7', '7'], false);
+    expectIsBlackjackToBe(['9', '8', '4'], false);
   });
 });
