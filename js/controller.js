@@ -1,6 +1,7 @@
 import {
   drawDealerCard,
   initializeShoe,
+  stand,
   standDealer,
   startNewHand
 } from './store/actions';
@@ -25,7 +26,15 @@ class Controller {
     this.oldState = this.state;
     this.state = this.store.getState();
 
-    if (!this.state.playerStood || this.state.dealerStood) {
+    if (!this.state.playerStood) {
+      if (HandUtils.getHandValue(this.state.playerCards) >= 21) {
+        this.dispatch(stand());
+      }
+
+      return;
+    }
+
+    if (this.state.dealerStood) {
       return;
     }
 

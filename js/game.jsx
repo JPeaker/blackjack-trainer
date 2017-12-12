@@ -5,6 +5,7 @@ import Immutable from 'immutable';
 
 import Hand from './hand';
 import HandUtils from './utils/hand';
+import GameUtils from './utils/game';
 import {
   drawPlayerCard,
   stand,
@@ -25,31 +26,19 @@ class Game extends React.Component {
   }
 
   render() {
-    const playerHandValue = HandUtils.getHandValue(this.props.playerHand);
-    const dealerHandValue = HandUtils.getHandValue(this.props.dealerHand);
-    let haveWon;
-    if (!this.props.stood) {
-      haveWon = '';
-    } else if (playerHandValue > dealerHandValue) {
-      haveWon = 'WIN';
-    } else if (playerHandValue === dealerHandValue) {
-      haveWon = 'PUSH';
-    } else {
-      haveWon = 'LOSE';
-    }
-
     return (
       <div>
         <button onClick={this.props.hit}>Hit</button>
         <button onClick={this.props.stand}>Stand</button>
         <button onClick={this.props.startNewHand}>Start New Hand</button>
+        <br />
         <Hand cards={this.props.playerHand} />
         <span>{HandUtils.getHandValue(this.props.playerHand)}</span>
         <br />
         <Hand cards={this.props.dealerHand} hideInitialCard={!this.props.stood} />
         <span>{this.props.stood ? HandUtils.getHandValue(this.props.dealerHand) : ''}</span>
         <br />
-        <span>{haveWon}</span>
+        <span>{!this.props.stood ? '' : GameUtils.scoreRound(this.props.playerHand, this.props.dealerHand)}</span>
       </div>
     );
   }

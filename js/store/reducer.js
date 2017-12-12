@@ -17,6 +17,7 @@ export default function reducer(state = defaultState, action) {
 
       return Object.assign({}, state, {
         playerCards: List([state.shoe.get(0), state.shoe.get(1)]),
+        playerStood: false,
         dealerCards: List([state.shoe.get(2), state.shoe.get(3)]),
         dealerStood: false,
         shoe: state.shoe.shift().shift().shift().shift()
