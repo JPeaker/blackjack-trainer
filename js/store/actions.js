@@ -3,7 +3,7 @@ export const DRAW_PLAYER_CARD = 'DRAW_PLAYER_CARD';
 export const DRAW_DEALER_CARD = 'DRAW_DEALER_CARD';
 export const STAND = 'STAND';
 export const START_NEW_HAND = 'START_NEW_HAND';
-export const STOP_DEALER_DRAWING = 'STOP_DEALER_DRAWING';
+export const STAND_DEALER = 'STAND_DEALER';
 
 export function initializeShoe() {
   return {
@@ -29,9 +29,9 @@ export function stand() {
   };
 };
 
-export function stopDealerDrawing() {
+export function standDealer() {
   return {
-    type: STOP_DEALER_DRAWING
+    type: STAND_DEALER
   };
 };
 
