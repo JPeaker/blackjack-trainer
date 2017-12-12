@@ -2,11 +2,11 @@ import { List } from 'immutable';
 
 export default class CardUtils {
   static get ranks() {
-    return ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+    return ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
   }
 
   static get suits() {
-    return ['clubs', 'diamonds', 'hearts','spades'];
+    return ['clubs', 'diamonds', 'hearts', 'spades'];
   }
 
   // If the suit is unspecified, just go with hearts, as it doesn't matter
@@ -48,11 +48,11 @@ export default class CardUtils {
 
   static shuffle(list) {
     let newList = list;
-    for (let i = list.size - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        const tempVar = newList.get(i);
-        newList = newList.set(i, newList.get(j));
-        newList = newList.set(j, tempVar);
+    for (let i = list.size - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tempVar = newList.get(i);
+      newList = newList.set(i, newList.get(j));
+      newList = newList.set(j, tempVar);
     }
 
     return newList;
@@ -60,8 +60,8 @@ export default class CardUtils {
 
   static generateDeck() {
     const newDeck = [];
-    for (var rank = 0; rank < CardUtils.ranks.length; rank++) {
-      for (var suit = 0; suit < CardUtils.suits.length; suit++) {
+    for (let rank = 0; rank < CardUtils.ranks.length; rank += 1) {
+      for (let suit = 0; suit < CardUtils.suits.length; suit += 1) {
         newDeck.push(CardUtils.generateCard(CardUtils.ranks[rank], CardUtils.suits[suit]));
       }
     }
@@ -71,7 +71,7 @@ export default class CardUtils {
 
   static generateShoe(numberOfDecks) {
     let newShoe = List();
-    for (var i = 0; i < numberOfDecks; i++) {
+    for (let i = 0; i < numberOfDecks; i += 1) {
       newShoe = newShoe.concat(CardUtils.generateDeck());
     }
 

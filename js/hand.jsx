@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { List } from 'immutable';
 
-import Card from './card.jsx';
+import Card from './card';
 
 export default class Hand extends React.Component {
   static get propTypes() {
@@ -12,15 +12,22 @@ export default class Hand extends React.Component {
     };
   }
 
+  static get defaultProps() {
+    return {
+      cards: List(),
+      hideInitialCard: false
+    };
+  }
+
   render() {
     let hiddenFirst = !this.props.hideInitialCard;
     // TODO: Remove Math.random()
-    return this.props.cards.map(
-      (card) => {
-        const cardElement = <Card key={Math.random()} rank={card.rank} suit={card.suit} hide={!hiddenFirst} />;
-        hiddenFirst = true;
-        return cardElement;
-      }
-    );
+    return this.props.cards.map((card) => {
+      const cardElement = (
+        <Card key={Math.random()} rank={card.rank} suit={card.suit} hide={!hiddenFirst} />
+      );
+      hiddenFirst = true;
+      return cardElement;
+    });
   }
 }
