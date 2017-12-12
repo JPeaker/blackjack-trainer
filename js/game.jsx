@@ -5,6 +5,7 @@ import Immutable from 'immutable';
 
 import Hand from './hand';
 import HandUtils from './utils/hand';
+import GameUtils from './utils/game';
 import {
   drawPlayerCard,
   stand,
@@ -17,6 +18,7 @@ class Game extends React.Component {
       dealerHand: PropTypes.instanceOf(Immutable.List).isRequired,
       playerHand: PropTypes.instanceOf(Immutable.List).isRequired,
       stood: PropTypes.bool.isRequired,
+      bank: PropTypes.number.isRequired,
 
       hit: PropTypes.func.isRequired,
       stand: PropTypes.func.isRequired,
@@ -25,31 +27,21 @@ class Game extends React.Component {
   }
 
   render() {
-    const playerHandValue = HandUtils.getHandValue(this.props.playerHand);
-    const dealerHandValue = HandUtils.getHandValue(this.props.dealerHand);
-    let haveWon;
-    if (!this.props.stood) {
-      haveWon = '';
-    } else if (playerHandValue > dealerHandValue) {
-      haveWon = 'WIN';
-    } else if (playerHandValue === dealerHandValue) {
-      haveWon = 'PUSH';
-    } else {
-      haveWon = 'LOSE';
-    }
-
     return (
       <div>
         <button onClick={this.props.hit}>Hit</button>
         <button onClick={this.props.stand}>Stand</button>
         <button onClick={this.props.startNewHand}>Start New Hand</button>
+        <br />
         <Hand cards={this.props.playerHand} />
         <span>{HandUtils.getHandValue(this.props.playerHand)}</span>
         <br />
         <Hand cards={this.props.dealerHand} hideInitialCard={!this.props.stood} />
         <span>{this.props.stood ? HandUtils.getHandValue(this.props.dealerHand) : ''}</span>
         <br />
-        <span>{haveWon}</span>
+        <span>{!this.props.stood ? '' : GameUtils.scoreRound(this.props.playerHand, this.props.dealerHand)}</span>
+        <br />
+        <span>{this.props.bank}</span>
       </div>
     );
   }
@@ -58,7 +50,8 @@ class Game extends React.Component {
 const mapStateToProps = state => ({
   playerHand: state.playerCards,
   dealerHand: state.dealerCards,
-  stood: state.playerStood
+  stood: state.playerStood,
+  bank: state.bank
 });
 
 const mapDispatchToProps = dispatch => ({

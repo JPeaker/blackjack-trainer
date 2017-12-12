@@ -7,8 +7,10 @@ import {
   drawPlayerCard,
   drawDealerCard,
   stand,
-  standDealer
+  standDealer,
+  rewardPlayer
 } from '../actions';
+import GameUtils from '../../utils/game';
 
 const initializedShoe = reducer(defaultState, initializeShoe());
 const storeWithNoCards = Object.assign({}, initializedShoe, { shoe: Immutable.List() });
@@ -18,6 +20,7 @@ const storeWithStoodPlayer = Object.assign({}, startNewHandWithEnoughCards, { pl
 const storeWithStoodDealer = Object.assign({}, startNewHandWithEnoughCards, { dealerStood: true });
 
 const startNewHandWithNoCards = reducer(storeWithNoCards, startNewHand());
+const startNewHandWithStoodPlayer = reducer(storeWithStoodPlayer, startNewHand());
 const startNewHandWithStoodDealer = reducer(storeWithStoodDealer, startNewHand());
 
 const drawPlayerCardWithEnoughCards = reducer(initializedShoe, drawPlayerCard());
@@ -48,6 +51,10 @@ describe('START_NEW_HAND', () => {
     expect(startNewHandWithEnoughCards.shoe.size).toEqual(initializedShoe.shoe.size - 4);
     expect(startNewHandWithEnoughCards.playerCards.size).toEqual(2);
     expect(startNewHandWithEnoughCards.dealerCards.size).toEqual(2);
+  });
+
+  it('should stop the player being stood', () => {
+    expect(startNewHandWithStoodPlayer.playerStood).toEqual(false);
   });
 
   it('should stop the dealer being stood', () => {
@@ -102,5 +109,27 @@ describe('STAND_DEALER', () => {
 
   it('should do nothing when the dealer is already stood', () => {
     expect(reducer(storeWithStoodDealer, standDealer()).dealerStood).toEqual(storeWithStoodDealer.dealerStood);
+  });
+});
+
+describe('REWARD_PLAYER', () => {
+  it('should take a betsize when player loses', () => {
+    expect(reducer(initializedShoe, rewardPlayer(GameUtils.HAND_RESULTS.LOSE)).bank)
+      .toEqual(initializedShoe.bank - initializedShoe.betSize);
+  });
+
+  it('should give a betsize when player wins', () => {
+    expect(reducer(initializedShoe, rewardPlayer(GameUtils.HAND_RESULTS.WIN)).bank)
+      .toEqual(initializedShoe.bank + initializedShoe.betSize);
+  });
+
+  it('should take a betsize when player pushes', () => {
+    expect(reducer(initializedShoe, rewardPlayer(GameUtils.HAND_RESULTS.PUSH)).bank)
+      .toEqual(initializedShoe.bank);
+  });
+
+  it('should take a betsize when player gets blackjack', () => {
+    expect(reducer(initializedShoe, rewardPlayer(GameUtils.HAND_RESULTS.BLACKJACK)).bank)
+      .toEqual(initializedShoe.bank + (initializedShoe.betSize * 3 / 2));
   });
 });
