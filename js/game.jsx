@@ -18,6 +18,7 @@ class Game extends React.Component {
       dealerHand: PropTypes.instanceOf(Immutable.List).isRequired,
       playerHand: PropTypes.instanceOf(Immutable.List).isRequired,
       stood: PropTypes.bool.isRequired,
+      bank: PropTypes.number.isRequired,
 
       hit: PropTypes.func.isRequired,
       stand: PropTypes.func.isRequired,
@@ -39,6 +40,8 @@ class Game extends React.Component {
         <span>{this.props.stood ? HandUtils.getHandValue(this.props.dealerHand) : ''}</span>
         <br />
         <span>{!this.props.stood ? '' : GameUtils.scoreRound(this.props.playerHand, this.props.dealerHand)}</span>
+        <br />
+        <span>{this.props.bank}</span>
       </div>
     );
   }
@@ -47,7 +50,8 @@ class Game extends React.Component {
 const mapStateToProps = state => ({
   playerHand: state.playerCards,
   dealerHand: state.dealerCards,
-  stood: state.playerStood
+  stood: state.playerStood,
+  bank: state.bank
 });
 
 const mapDispatchToProps = dispatch => ({

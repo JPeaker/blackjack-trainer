@@ -1,7 +1,16 @@
 import { List } from 'immutable';
 import defaultState from './default-state';
 import CardUtils from '../utils/card';
-import { INITIALIZE_SHOE, START_NEW_HAND, DRAW_PLAYER_CARD, DRAW_DEALER_CARD, STAND_DEALER, STAND } from './actions';
+import GameUtils from '../utils/game';
+import {
+  INITIALIZE_SHOE,
+  START_NEW_HAND,
+  DRAW_PLAYER_CARD,
+  DRAW_DEALER_CARD,
+  STAND_DEALER,
+  STAND,
+  REWARD_PLAYER
+} from './actions';
 
 export default function reducer(state = defaultState, action) {
   switch (action.type) {
@@ -56,6 +65,21 @@ export default function reducer(state = defaultState, action) {
 
     case STAND_DEALER:
       return Object.assign({}, state, { dealerStood: true });
+
+    case REWARD_PLAYER:
+      if (action.roundResult === GameUtils.HAND_RESULTS.LOSE) {
+        return Object.assign({}, state, { bank: state.bank - state.betSize });
+      }
+
+      if (action.roundResult === GameUtils.HAND_RESULTS.WIN) {
+        return Object.assign({}, state, { bank: state.bank + state.betSize });
+      }
+
+      if (action.roundResult === GameUtils.HAND_RESULTS.BLACKJACK) {
+        return Object.assign({}, state, { bank: state.bank + (state.betSize * 3 / 2) });
+      }
+
+      return state;
 
     default:
       return state;

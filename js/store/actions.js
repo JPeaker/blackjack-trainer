@@ -4,6 +4,7 @@ export const DRAW_DEALER_CARD = 'DRAW_DEALER_CARD';
 export const STAND = 'STAND';
 export const START_NEW_HAND = 'START_NEW_HAND';
 export const STAND_DEALER = 'STAND_DEALER';
+export const REWARD_PLAYER = 'REWARD_PLAYER';
 
 export function initializeShoe() {
   return {
@@ -38,5 +39,12 @@ export function standDealer() {
 export function startNewHand() {
   return {
     type: START_NEW_HAND
+  };
+}
+
+export function rewardPlayer(roundResult) {
+  return {
+    type: REWARD_PLAYER,
+    roundResult
   };
 }

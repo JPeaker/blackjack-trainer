@@ -3,9 +3,11 @@ import {
   initializeShoe,
   stand,
   standDealer,
-  startNewHand
+  startNewHand,
+  rewardPlayer
 } from './store/actions';
 import HandUtils from './utils/hand';
+import GameUtils from './utils/game';
 
 class Controller {
   constructor(store) {
@@ -45,6 +47,9 @@ class Controller {
     }
 
     this.dispatch(standDealer());
+    this.dispatch(
+      rewardPlayer(GameUtils.scoreRound(this.state.playerCards, this.state.dealerCards))
+    );
   }
 }
 

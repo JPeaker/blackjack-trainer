@@ -6,6 +6,7 @@ export default {
   shoe: List(),
   playerStood: false,
   dealerStood: false,
-  numberOfDecks: 1,
-  bank: 10000
+  numberOfDecks: 8,
+  bank: 10000,
+  betSize: 10
 };
