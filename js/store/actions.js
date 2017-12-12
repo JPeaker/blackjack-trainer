@@ -9,34 +9,34 @@ export function initializeShoe() {
   return {
     type: INITIALIZE_SHOE
   };
-};
+}
 
 export function drawPlayerCard() {
   return {
     type: DRAW_PLAYER_CARD
   };
-};
+}
 
 export function drawDealerCard() {
   return {
     type: DRAW_DEALER_CARD
   };
-};
+}
 
 export function stand() {
   return {
     type: STAND
   };
-};
+}
 
 export function standDealer() {
   return {
     type: STAND_DEALER
   };
-};
+}
 
 export function startNewHand() {
   return {
     type: START_NEW_HAND
   };
-};
+}

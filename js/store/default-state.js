@@ -8,4 +8,4 @@ export default {
   dealerStood: false,
   numberOfDecks: 1,
   bank: 10000
-}
+};
