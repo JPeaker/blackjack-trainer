@@ -2,27 +2,33 @@ import CardUtils from '../card';
 import HandUtils from '../hand';
 import { List } from 'immutable';
 
+const expectHandToEqual = (cards, expectedStood = false) => {
+  expect(HandUtils.generateHand(cards)).toEqual({
+    cards: List(cards.map(card => CardUtils.generateCard(card))),
+    stood: expectedStood
+  });
+}
+
 describe('generateHand()', () => {
   it('generates empty hand', () => {
-    expect(HandUtils.generateHand(List())).toEqual(List());
+    expectHandToEqual([]);
   });
 
   it('generates single card hand', () => {
-    expect(HandUtils.generateHand(List(['5']))).toEqual(List([CardUtils.generateCard('5')]));
+    expectHandToEqual(['5']);
   });
 
   it('generates multiple card hand', () => {
-    expect(
-      HandUtils.generateHand(List(['2', '3', 'A']))
-    ).toEqual(
-      List([CardUtils.generateCard('2'), CardUtils.generateCard('3'), CardUtils.generateCard('A')])
-    );
+    expectHandToEqual(['2', '3', 'A']);
   });
 });
 
 const expectMaxHandValueOfToBe = (listOfRanks, toBe) => {
   expect(
-    HandUtils.getMaxHandValue(List(listOfRanks.map((rank) => CardUtils.generateCard(rank))))
+    HandUtils.getMaxHandValue({
+      cards: List(listOfRanks.map((rank) => CardUtils.generateCard(rank))),
+      stood: false
+    })
   ).toEqual(toBe);
 }
 
@@ -53,7 +59,10 @@ describe('getMaxHandValue()', () => {
 
 const expectHandValueOfToBe = (listOfRanks, toBe) => {
   expect(
-    HandUtils.getHandValue(List(listOfRanks.map((rank) => CardUtils.generateCard(rank))))
+    HandUtils.getHandValue({
+      cards: List(listOfRanks.map((rank) => CardUtils.generateCard(rank))),
+      stood: false
+    })
   ).toEqual(toBe);
 };
 
@@ -86,7 +95,7 @@ describe('getHandValue()', () => {
 });
 
 const expectIsBlackjackToBe = (hand, isBlackjack) => {
-  expect(HandUtils.isBlackjack(List(HandUtils.generateHand(hand)))).toEqual(isBlackjack);
+  expect(HandUtils.isBlackjack(HandUtils.generateHand(hand))).toEqual(isBlackjack);
 };
 
 describe('isBlackjack()', () => {

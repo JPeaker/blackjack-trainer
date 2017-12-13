@@ -8,6 +8,7 @@ import {
 } from './store/actions';
 import HandUtils from './utils/hand';
 import GameUtils from './utils/game';
+import StoreUtils from './store/utils';
 
 class Controller {
   constructor(store) {
@@ -28,19 +29,30 @@ class Controller {
     this.oldState = this.state;
     this.state = this.store.getState();
 
-    if (!this.state.playerStood) {
-      if (HandUtils.getHandValue(this.state.playerCards) >= 21) {
+    if (
+      HandUtils.isBlackjack(this.state.dealerHand) &&
+      !StoreUtils.allPlayerHandsStood(this.state)
+    ) {
+      this.dispatch(stand());
+      return;
+    }
+
+    if (!StoreUtils.allPlayerHandsStood(this.state)) {
+      if (HandUtils.getHandValue(StoreUtils.getPlayerHand(this.state)) >= 21) {
         this.dispatch(stand());
       }
 
       return;
     }
 
-    if (this.state.dealerStood) {
+    if (this.state.dealerHand.stood) {
       return;
     }
 
-    if (this.state.playerStood && HandUtils.getHandValue(this.state.dealerCards) < 17) {
+    if (
+      StoreUtils.allPlayerHandsStood(this.state) &&
+      HandUtils.getHandValue(this.state.dealerHand) < 17
+    ) {
       this.dispatch(drawDealerCard());
 
       return;
@@ -48,7 +60,7 @@ class Controller {
 
     this.dispatch(standDealer());
     this.dispatch(
-      rewardPlayer(GameUtils.scoreRound(this.state.playerCards, this.state.dealerCards))
+      rewardPlayer(GameUtils.scoreRound(StoreUtils.getPlayerHand(this.state, 0), this.state.dealerHand))
     );
   }
 }

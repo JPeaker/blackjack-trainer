@@ -9,17 +9,9 @@ export default class CardUtils {
     return ['clubs', 'diamonds', 'hearts', 'spades'];
   }
 
-  // If the suit is unspecified, just go with spades, as it doesn't matter
-  static generateCard(rank, suit) {
+  static generateCard(rank, suit = 'spades') {
     if (CardUtils.ranks.indexOf(rank) === -1) {
       throw new Error('Invalid card rank');
-    }
-
-    if (suit === undefined) {
-      return {
-        rank,
-        suit: 'spades'
-      };
     }
 
     if (CardUtils.suits.indexOf(suit) === -1) {

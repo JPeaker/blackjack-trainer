@@ -25,21 +25,29 @@ export default function reducer(state = defaultState, action) {
       }
 
       return Object.assign({}, state, {
-        playerCards: List([state.shoe.get(0), state.shoe.get(1)]),
-        playerStood: false,
-        dealerCards: List([state.shoe.get(2), state.shoe.get(3)]),
-        dealerStood: false,
+        playerHands: List([{
+          cards: List([state.shoe.get(0), state.shoe.get(1)]),
+          stood: false
+        }]),
+        dealerHand: {
+          cards: List([state.shoe.get(2), state.shoe.get(3)]),
+          stood: false
+        },
         shoe: state.shoe.shift().shift().shift().shift()
       });
 
     case DRAW_PLAYER_CARD:
-      if (state.playerStood) {
+      if (state.playerHands.get(state.currentPlayerHand).stood) {
         return state;
       }
 
       if (state.shoe.size > 0) {
+        const currentPlayerHand = state.playerHands.get(state.currentPlayerHand);
+        const newPlayerHand = Object.assign({}, currentPlayerHand, {
+          cards: currentPlayerHand.cards.push(state.shoe.get(0))
+        });
         return Object.assign({}, state, {
-          playerCards: state.playerCards.push(state.shoe.get(0)),
+          playerHands: state.playerHands.set(state.currentPlayerHand, newPlayerHand),
           shoe: state.shoe.shift()
         });
       }
@@ -49,7 +57,9 @@ export default function reducer(state = defaultState, action) {
     case DRAW_DEALER_CARD:
       if (state.shoe.size > 0) {
         return Object.assign({}, state, {
-          dealerCards: state.dealerCards.push(state.shoe.get(0)),
+          dealerHand: {
+            cards: state.dealerHand.cards.push(state.shoe.get(0))
+          },
           shoe: state.shoe.shift()
         });
       }
@@ -57,14 +67,18 @@ export default function reducer(state = defaultState, action) {
       return state;
 
     case STAND:
-      if (state.playerStood) {
-        return state;
-      }
-
-      return Object.assign({}, state, { playerStood: true });
+      return Object.assign({}, state, {
+        playerHands: state.playerHands.set(state.currentPlayerHand, {
+          cards: state.playerHands.get(state.currentPlayerHand).cards,
+          stood: true
+        }),
+        currentPlayerHand: (state.currentPlayerHand + 1) % state.playerHands.size
+      });
 
     case STAND_DEALER:
-      return Object.assign({}, state, { dealerStood: true });
+      return Object.assign({}, state, {
+        dealerHand: Object.assign({}, state.dealerHand, { stood: true })
+      })
 
     case REWARD_PLAYER:
       if (action.roundResult === GameUtils.HAND_RESULTS.LOSE) {
