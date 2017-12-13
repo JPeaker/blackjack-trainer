@@ -1,17 +1,25 @@
 import CardUtils from './card';
+import { List } from 'immutable';
 
 export default class HandUtils {
   static generateHand(hand) {
-    return hand.map(card => CardUtils.generateCard(card));
+    return {
+      cards: List(hand.map(card => CardUtils.generateCard(card))),
+      stood: false
+    }
   }
 
   static getMaxHandValue(hand) {
-    return hand.reduce((sum, card) => sum + CardUtils.getCardValue(card), 0);
+    if (hand.cards.size === 0) {
+      return 0;
+    }
+
+    return hand.cards.reduce((sum, card) => sum + CardUtils.getCardValue(card), 0);
   }
 
   static getHandValue(hand) {
     let maxHandValue = HandUtils.getMaxHandValue(hand);
-    let numberOfAces = hand
+    let numberOfAces = hand.cards
       .map(card => card.rank === 'A')
       .reduce((sum, isAce) => sum + Number(isAce), 0);
 
@@ -24,6 +32,6 @@ export default class HandUtils {
   }
 
   static isBlackjack(hand) {
-    return hand.size === 2 && HandUtils.getHandValue(hand) === 21;
+    return hand.cards.size === 2 && HandUtils.getHandValue(hand) === 21;
   }
 }

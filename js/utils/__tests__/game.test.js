@@ -1,17 +1,13 @@
-import CardUtils from '../card';
+import HandUtils from '../hand';
 import GameUtils from '../game';
 import { List } from 'immutable';
 
-const generateHand = (ranks) => {
-  return List(ranks.map(rank => CardUtils.generateCard(rank)));
-};
-
-const blackjack = generateHand(['A', 'K']);
-const five = generateHand(['2', '3']);
-const fifteen = generateHand(['10', '5']);
-const twenty = generateHand(['J', 'Q']);
-const twentyone = generateHand(['4', '6', 'A']);
-const bust = generateHand(['10', '6', '7']);
+const blackjack = HandUtils.generateHand(['A', 'K']);
+const five = HandUtils.generateHand(['2', '3']);
+const fifteen = HandUtils.generateHand(['10', '5']);
+const twenty = HandUtils.generateHand(['J', 'Q']);
+const twentyone = HandUtils.generateHand(['4', '6', 'A']);
+const bust = HandUtils.generateHand(['10', '6', '7']);
 
 const expectScoreToBe = (player, dealer, score) => {
   expect(GameUtils.scoreRound(player, dealer)).toEqual(GameUtils.HAND_RESULTS[score]);

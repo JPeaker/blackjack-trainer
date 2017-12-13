@@ -6,6 +6,7 @@ import Immutable from 'immutable';
 import Hand from './hand';
 import HandUtils from './utils/hand';
 import GameUtils from './utils/game';
+import StoreUtils from './store/utils';
 import {
   drawPlayerCard,
   stand,
@@ -15,8 +16,8 @@ import {
 class Game extends React.Component {
   static get propTypes() {
     return {
-      dealerHand: PropTypes.instanceOf(Immutable.List).isRequired,
-      playerHand: PropTypes.instanceOf(Immutable.List).isRequired,
+      dealerHand: PropTypes.object.isRequired,
+      playerHands: PropTypes.instanceOf(Immutable.List).isRequired,
       stood: PropTypes.bool.isRequired,
       bank: PropTypes.number.isRequired,
 
@@ -33,13 +34,14 @@ class Game extends React.Component {
         <button onClick={this.props.stand}>Stand</button>
         <button onClick={this.props.startNewHand}>Start New Hand</button>
         <br />
-        <Hand cards={this.props.playerHand} />
-        <span>{HandUtils.getHandValue(this.props.playerHand)}</span>
+        {
+          this.props.playerHands.map(hand => { return <Hand key={Math.random()} hand={hand} />; })
+        }
         <br />
-        <Hand cards={this.props.dealerHand} hideInitialCard={!this.props.stood} />
+        <Hand hand={this.props.dealerHand} hideInitialCard={!this.props.stood} />
         <span>{this.props.stood ? HandUtils.getHandValue(this.props.dealerHand) : ''}</span>
         <br />
-        <span>{!this.props.stood ? '' : GameUtils.scoreRound(this.props.playerHand, this.props.dealerHand)}</span>
+        <span>{!this.props.stood ? '' : GameUtils.scoreRound(this.props.playerHands.get(0), this.props.dealerHand)}</span>
         <br />
         <span>{this.props.bank}</span>
       </div>
@@ -48,9 +50,9 @@ class Game extends React.Component {
 }
 
 const mapStateToProps = state => ({
-  playerHand: state.playerCards,
-  dealerHand: state.dealerCards,
-  stood: state.playerStood,
+  playerHands: state.playerHands,
+  dealerHand: state.dealerHand,
+  stood: StoreUtils.getPlayerHand(state).stood,
   bank: state.bank
 });
 

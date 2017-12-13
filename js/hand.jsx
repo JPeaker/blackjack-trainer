@@ -7,14 +7,17 @@ import Card from './card';
 export default class Hand extends React.Component {
   static get propTypes() {
     return {
-      cards: PropTypes.instanceOf(List),
+      hand: PropTypes.object,
       hideInitialCard: PropTypes.bool
     };
   }
 
   static get defaultProps() {
     return {
-      cards: List(),
+      hand: {
+        cards: List(),
+        stood: false
+      },
       hideInitialCard: false
     };
   }
@@ -22,7 +25,7 @@ export default class Hand extends React.Component {
   render() {
     let hiddenFirst = !this.props.hideInitialCard;
     // TODO: Remove Math.random()
-    return this.props.cards.map((card) => {
+    return this.props.hand.cards.map((card) => {
       const cardElement = (
         <Card key={Math.random()} rank={card.rank} suit={card.suit} hide={!hiddenFirst} />
       );

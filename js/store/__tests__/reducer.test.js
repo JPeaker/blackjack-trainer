@@ -10,14 +10,20 @@ import {
   standDealer,
   rewardPlayer
 } from '../actions';
+import StoreUtils from '../utils';
 import GameUtils from '../../utils/game';
 
 const initializedShoe = reducer(defaultState, initializeShoe());
 const storeWithNoCards = Object.assign({}, initializedShoe, { shoe: Immutable.List() });
 
 const startNewHandWithEnoughCards = reducer(initializedShoe, startNewHand());
-const storeWithStoodPlayer = Object.assign({}, startNewHandWithEnoughCards, { playerStood: true });
-const storeWithStoodDealer = Object.assign({}, startNewHandWithEnoughCards, { dealerStood: true });
+
+const storeWithStoodPlayer = Object.assign({}, startNewHandWithEnoughCards, {
+  playerHands: StoreUtils.standPlayerHand(startNewHandWithEnoughCards)
+});
+const storeWithStoodDealer = Object.assign({}, startNewHandWithEnoughCards, {
+  dealerHand: StoreUtils.standDealerHand(startNewHandWithEnoughCards)
+});
 
 const startNewHandWithNoCards = reducer(storeWithNoCards, startNewHand());
 const startNewHandWithStoodPlayer = reducer(storeWithStoodPlayer, startNewHand());
@@ -29,6 +35,9 @@ const drawPlayerCardWithStoodPlayer = reducer(storeWithStoodPlayer, drawPlayerCa
 
 const drawDealerCardWithNoCards = reducer(storeWithNoCards, drawDealerCard());
 const drawDealerCardWithEnoughCards = reducer(initializedShoe, drawDealerCard());
+
+const standWithEnoughCards = reducer(startNewHandWithEnoughCards, stand());
+const standWithStoodPlayer = reducer(storeWithStoodPlayer, stand());
 
 describe('INITIALIZE_SHOE', () => {
   it('should overwrite any existing shoe', () => {
@@ -43,72 +52,87 @@ describe('INITIALIZE_SHOE', () => {
 describe('START_NEW_HAND', () => {
   it('should do nothing if there are fewer than 4 cards in the shoe', () => {
     expect(startNewHandWithNoCards.shoe).toEqual(storeWithNoCards.shoe);
-    expect(startNewHandWithNoCards.playerCards).toEqual(storeWithNoCards.playerCards);
-    expect(startNewHandWithNoCards.dealerCards).toEqual(storeWithNoCards.dealerCards);
+    expect(StoreUtils.getPlayerHand(startNewHandWithNoCards).cards)
+      .toEqual(StoreUtils.getPlayerHand(storeWithNoCards).cards);
+    expect(startNewHandWithNoCards.dealerHand).toEqual(storeWithNoCards.dealerHand);
   });
 
   it('should deal 2 cards to the player and the dealer', () => {
     expect(startNewHandWithEnoughCards.shoe.size).toEqual(initializedShoe.shoe.size - 4);
-    expect(startNewHandWithEnoughCards.playerCards.size).toEqual(2);
-    expect(startNewHandWithEnoughCards.dealerCards.size).toEqual(2);
+    expect(StoreUtils.getPlayerHand(startNewHandWithEnoughCards).cards.size).toEqual(2);
+    expect(startNewHandWithEnoughCards.dealerHand.cards.size).toEqual(2);
   });
 
   it('should stop the player being stood', () => {
-    expect(startNewHandWithStoodPlayer.playerStood).toEqual(false);
+    expect(startNewHandWithStoodPlayer.playerHands.reduce(
+      (anyStoodSoFar, hand) => anyStoodSoFar || hand.stood,
+      false
+    )).toEqual(false);
   });
 
   it('should stop the dealer being stood', () => {
-    expect(startNewHandWithStoodDealer.dealerStood).toEqual(false);
+    expect(startNewHandWithStoodDealer.dealerHand.stood).toEqual(false);
   });
 });
 
 describe('DRAW_PLAYER_CARD', () => {
   it('should do nothing if the player is stood', () => {
-    expect(drawPlayerCardWithStoodPlayer.playerStood).toEqual(true);
     expect(drawPlayerCardWithStoodPlayer.shoe.size).toEqual(storeWithStoodPlayer.shoe.size);
-    expect(drawPlayerCardWithStoodPlayer.playerCards.size).toEqual(storeWithStoodPlayer.playerCards.size);
+    const handBeforeAction = StoreUtils.getPlayerHand(
+      storeWithStoodPlayer,
+      storeWithStoodPlayer.currentPlayerHand - 1
+    );
+    const handAfterAction = StoreUtils.getPlayerHand(
+      drawPlayerCardWithStoodPlayer,
+      drawPlayerCardWithStoodPlayer.currentPlayerHand - 1
+    );
+    expect(handBeforeAction.stood).toEqual(true);
+    expect(handAfterAction.stood).toEqual(true);
+    expect(handBeforeAction.cards.size).toEqual(handAfterAction.cards.size);
   });
 
   it('should do nothing if no cards are left', () => {
-    expect(drawPlayerCardWithNoCards.playerCards.size).toEqual(storeWithNoCards.playerCards.size);
+    expect(StoreUtils.getPlayerHand(drawPlayerCardWithNoCards).cards.size)
+      .toEqual(StoreUtils.getPlayerHand(storeWithNoCards).cards.size);
   });
 
   it('should give the player a card from the shoe', () => {
     expect(drawPlayerCardWithEnoughCards.shoe.size).toEqual(initializedShoe.shoe.size - 1);
-    expect(drawPlayerCardWithEnoughCards.playerCards.size).toEqual(initializedShoe.playerCards.size + 1);
+    expect(StoreUtils.getPlayerHand(drawPlayerCardWithEnoughCards).cards.size)
+      .toEqual(StoreUtils.getPlayerHand(initializedShoe).cards.size + 1);
   });
 });
 
 describe('DRAW_DEALER_CARD', () => {
   it('should do nothing if no cards are left', () => {
-    expect(drawDealerCardWithNoCards.dealerCards.size).toEqual(storeWithNoCards.dealerCards.size);
+    expect(drawDealerCardWithNoCards.dealerHand.cards.size).toEqual(storeWithNoCards.dealerHand.cards.size);
   });
 
   it('should give the dealer a card from the shoe', () => {
     expect(drawDealerCardWithEnoughCards.shoe.size).toEqual(initializedShoe.shoe.size - 1);
-    expect(drawDealerCardWithEnoughCards.dealerCards.size).toEqual(initializedShoe.dealerCards.size + 1);
+    expect(drawDealerCardWithEnoughCards.dealerHand.cards.size).toEqual(initializedShoe.dealerHand.cards.size + 1);
   });
 });
 
 describe('STAND', () => {
   it('should stand the player', () => {
-    expect(reducer(startNewHandWithEnoughCards, stand()).playerStood).toEqual(true);
+    expect(standWithEnoughCards.playerHands.get(standWithEnoughCards.currentPlayerHand).stood).toEqual(true);
   });
 
   it('should do nothing when the player is already stood', () => {
-    expect(
-      reducer(storeWithStoodPlayer, stand()).playerStood
-    ).toEqual(storeWithStoodPlayer.playerStood);
+    expect(standWithStoodPlayer.playerHands.get(standWithStoodPlayer.currentPlayerHand).stood)
+      .toEqual(storeWithStoodPlayer.playerHands.get(storeWithStoodPlayer.currentPlayerHand).stood);
   });
 });
 
 describe('STAND_DEALER', () => {
   it('should stand the dealer', () => {
-    expect(reducer(startNewHandWithEnoughCards, standDealer()).dealerStood).toEqual(true);
+    expect(reducer(startNewHandWithEnoughCards, standDealer()).dealerHand.stood).toEqual(true);
   });
 
   it('should do nothing when the dealer is already stood', () => {
-    expect(reducer(storeWithStoodDealer, standDealer()).dealerStood).toEqual(storeWithStoodDealer.dealerStood);
+    expect(reducer(storeWithStoodDealer, standDealer()).dealerHand.stood)
+      .toEqual(storeWithStoodDealer.dealerHand.stood);
   });
 });
 
