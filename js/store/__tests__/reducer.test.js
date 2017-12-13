@@ -161,14 +161,14 @@ describe('REWARD_PLAYER', () => {
 
 describe('DOUBLE', () => {
   const playerHandBefore = StoreUtils.getPlayerHand(startNewHandWithEnoughCards);
-  const doubleHand = reducer(startNewHandWithEnoughCards, doubleHand());
-  const playerHandAfter = StoreUtils.getPlayerHand(doubleHand);
+  const stateAfterDouble = reducer(startNewHandWithEnoughCards, doubleHand());
+  const playerHandAfter = StoreUtils.getPlayerHand(stateAfterDouble);
   it('double the bet size of the hand', () => {
     expect(playerHandAfter.bet).toEqual(playerHandBefore.bet * 2);
   });
 
   it('take away an extra bet from the bank', () => {
-    expect(doubleHand.bank).toEqual(startNewHandWithEnoughCards.bank - playerHandBefore.bet);
+    expect(stateAfterDouble.bank).toEqual(startNewHandWithEnoughCards.bank - playerHandBefore.bet);
   });
 
   it('take an extra card', () => {
@@ -179,4 +179,14 @@ describe('DOUBLE', () => {
     expect(playerHandBefore.stood).toEqual(false);
     expect(playerHandAfter.stood).toEqual(true);
   })
+
+  it('does nothing if the hand has more than two cards', () => {
+    const multiCardHand = reducer(startNewHandWithEnoughCards, drawPlayerCard());
+    const multiCardHandAfter = reducer(multiCardHand, doubleHand());
+    expect(multiCardHand).toEqual(multiCardHandAfter);
+  });
+
+  it('does nothing if all player hands are stood', () => {
+    expect(reducer(storeWithStoodPlayer, doubleHand())).toEqual(storeWithStoodPlayer);
+  });
 });

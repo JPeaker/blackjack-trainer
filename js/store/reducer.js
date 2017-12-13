@@ -102,6 +102,11 @@ export default function reducer(state = defaultState, action) {
 
     case DOUBLE:
       const doublePlayerHand = StoreUtils.getPlayerHand(state);
+
+      if (StoreUtils.allPlayerHandsStood(state) || doublePlayerHand.cards.size > 2) {
+        return state;
+      }
+
       return Object.assign({}, state, {
         playerHands: StoreUtils.setPlayerHandInList(
           state,
