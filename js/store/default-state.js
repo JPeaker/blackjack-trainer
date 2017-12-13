@@ -3,7 +3,8 @@ import { List } from 'immutable';
 export default {
   playerHands: List([{
     cards: List(),
-    stood: false
+    stood: false,
+    bet: 10
   }]),
   currentPlayerHand: 0,
   dealerHand: {

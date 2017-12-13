@@ -9,6 +9,7 @@ import GameUtils from './utils/game';
 import StoreUtils from './store/utils';
 import {
   drawPlayerCard,
+  doubleHand,
   stand,
   startNewHand,
 } from './store/actions';
@@ -23,6 +24,7 @@ class Game extends React.Component {
 
       hit: PropTypes.func.isRequired,
       stand: PropTypes.func.isRequired,
+      doubleHand: PropTypes.func.isRequired,
       startNewHand: PropTypes.func.isRequired,
     };
   }
@@ -32,10 +34,11 @@ class Game extends React.Component {
       <div>
         <button onClick={this.props.hit}>Hit</button>
         <button onClick={this.props.stand}>Stand</button>
+        <button onClick={this.props.doubleHand}>Double</button>
         <button onClick={this.props.startNewHand}>Start New Hand</button>
         <br />
         {
-          this.props.playerHands.map(hand => { return <Hand key={Math.random()} hand={hand} />; })
+          this.props.playerHands.map(hand => { return [<Hand key={Math.random()} hand={hand} />, hand.bet]; })
         }
         <br />
         <Hand hand={this.props.dealerHand} hideInitialCard={!this.props.stood} />
@@ -58,6 +61,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   hit: () => { dispatch(drawPlayerCard()); },
+  doubleHand: () => { dispatch(doubleHand()); },
   stand: () => { dispatch(stand()); },
   startNewHand: () => { dispatch(startNewHand()); }
 });

@@ -5,6 +5,7 @@ import { List } from 'immutable';
 const expectHandToEqual = (cards, expectedStood = false) => {
   expect(HandUtils.generateHand(cards)).toEqual({
     cards: List(cards.map(card => CardUtils.generateCard(card))),
+    bet: 10,
     stood: expectedStood
   });
 }
@@ -27,6 +28,7 @@ const expectMaxHandValueOfToBe = (listOfRanks, toBe) => {
   expect(
     HandUtils.getMaxHandValue({
       cards: List(listOfRanks.map((rank) => CardUtils.generateCard(rank))),
+      bet: 10,
       stood: false
     })
   ).toEqual(toBe);
@@ -61,6 +63,7 @@ const expectHandValueOfToBe = (listOfRanks, toBe) => {
   expect(
     HandUtils.getHandValue({
       cards: List(listOfRanks.map((rank) => CardUtils.generateCard(rank))),
+      bet: 10,
       stood: false
     })
   ).toEqual(toBe);

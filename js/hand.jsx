@@ -15,8 +15,7 @@ export default class Hand extends React.Component {
   static get defaultProps() {
     return {
       hand: {
-        cards: List(),
-        stood: false
+        cards: List()
       },
       hideInitialCard: false
     };
