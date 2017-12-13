@@ -2,6 +2,7 @@ import { List } from 'immutable';
 import defaultState from './default-state';
 import CardUtils from '../utils/card';
 import GameUtils from '../utils/game';
+import StoreUtils from '../store/utils';
 import {
   INITIALIZE_SHOE,
   START_NEW_HAND,
@@ -27,6 +28,7 @@ export default function reducer(state = defaultState, action) {
       return Object.assign({}, state, {
         playerHands: List([{
           cards: List([state.shoe.get(0), state.shoe.get(1)]),
+          bet: state.betSize,
           stood: false
         }]),
         dealerHand: {
@@ -67,11 +69,12 @@ export default function reducer(state = defaultState, action) {
       return state;
 
     case STAND:
+      const standPlayerHand = StoreUtils.getPlayerHand(state);
       return Object.assign({}, state, {
-        playerHands: state.playerHands.set(state.currentPlayerHand, {
+        playerHands: state.playerHands.set(state.currentPlayerHand, Object.assign({}, standPlayerHand, {
           cards: state.playerHands.get(state.currentPlayerHand).cards,
           stood: true
-        }),
+        })),
         currentPlayerHand: (state.currentPlayerHand + 1) % state.playerHands.size
       });
 
@@ -82,15 +85,15 @@ export default function reducer(state = defaultState, action) {
 
     case REWARD_PLAYER:
       if (action.roundResult === GameUtils.HAND_RESULTS.LOSE) {
-        return Object.assign({}, state, { bank: state.bank - state.betSize });
+        return Object.assign({}, state, { bank: state.bank - StoreUtils.getPlayerHand(state).bet });
       }
 
       if (action.roundResult === GameUtils.HAND_RESULTS.WIN) {
-        return Object.assign({}, state, { bank: state.bank + state.betSize });
+        return Object.assign({}, state, { bank: state.bank + StoreUtils.getPlayerHand(state).bet });
       }
 
       if (action.roundResult === GameUtils.HAND_RESULTS.BLACKJACK) {
-        return Object.assign({}, state, { bank: state.bank + (state.betSize * 3 / 2) });
+        return Object.assign({}, state, { bank: state.bank + (StoreUtils.getPlayerHand(state).bet * 3 / 2) });
       }
 
       return state;

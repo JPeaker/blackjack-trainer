@@ -5,6 +5,7 @@ export default class HandUtils {
   static generateHand(hand) {
     return {
       cards: List(hand.map(card => CardUtils.generateCard(card))),
+      bet: 10,
       stood: false
     }
   }

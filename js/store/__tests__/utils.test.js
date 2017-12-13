@@ -1,10 +1,11 @@
 import { List } from 'immutable';
 import StoreUtils from '../utils';
+import HandUtils from '../../utils/hand';
 
-const hand1 = { cards: List([{ rank: '2', suit: 'spades' }]), stood: false };
-const hand2 = { cards: List([{ rank: '3', suit: 'spades' }]), stood: false };
-const hand3 = { cards: List([{ rank: '4', suit: 'spades' }]), stood: false };
-const dealerHand = { cards: List([{ rank: '5', suit: 'spades' }]), stood: false };
+const hand1 = HandUtils.generateHand(['2'])
+const hand2 = HandUtils.generateHand(['3'])
+const hand3 = HandUtils.generateHand(['4'])
+const dealerHand = HandUtils.generateHand(['5'])
 
 const standHand = (hand) => Object.assign({}, hand, { stood: true });
 
