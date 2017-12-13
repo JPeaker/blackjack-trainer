@@ -8,7 +8,8 @@ import {
   drawDealerCard,
   stand,
   standDealer,
-  rewardPlayer
+  rewardPlayer,
+  doubleHand
 } from '../actions';
 import StoreUtils from '../utils';
 import GameUtils from '../../utils/game';
@@ -40,43 +41,43 @@ const standWithEnoughCards = reducer(startNewHandWithEnoughCards, stand());
 const standWithStoodPlayer = reducer(storeWithStoodPlayer, stand());
 
 describe('INITIALIZE_SHOE', () => {
-  it('should overwrite any existing shoe', () => {
+  it('overwrite any existing shoe', () => {
     expect(Immutable.is(defaultState.shoe, initializedShoe.shoe)).toEqual(false);
   });
 
-  it('should create a correctly sized shoe', () => {
+  it('create a correctly sized shoe', () => {
     expect(initializedShoe.shoe.size).toEqual(initializedShoe.numberOfDecks * 52);
   });
 });
 
 describe('START_NEW_HAND', () => {
-  it('should do nothing if there are fewer than 4 cards in the shoe', () => {
+  it('do nothing if there are fewer than 4 cards in the shoe', () => {
     expect(startNewHandWithNoCards.shoe).toEqual(storeWithNoCards.shoe);
     expect(StoreUtils.getPlayerHand(startNewHandWithNoCards).cards)
       .toEqual(StoreUtils.getPlayerHand(storeWithNoCards).cards);
     expect(startNewHandWithNoCards.dealerHand).toEqual(storeWithNoCards.dealerHand);
   });
 
-  it('should deal 2 cards to the player and the dealer', () => {
+  it('deal 2 cards to the player and the dealer', () => {
     expect(startNewHandWithEnoughCards.shoe.size).toEqual(initializedShoe.shoe.size - 4);
     expect(StoreUtils.getPlayerHand(startNewHandWithEnoughCards).cards.size).toEqual(2);
     expect(startNewHandWithEnoughCards.dealerHand.cards.size).toEqual(2);
   });
 
-  it('should stop the player being stood', () => {
+  it('stop the player being stood', () => {
     expect(startNewHandWithStoodPlayer.playerHands.reduce(
       (anyStoodSoFar, hand) => anyStoodSoFar || hand.stood,
       false
     )).toEqual(false);
   });
 
-  it('should stop the dealer being stood', () => {
+  it('stop the dealer being stood', () => {
     expect(startNewHandWithStoodDealer.dealerHand.stood).toEqual(false);
   });
 });
 
 describe('DRAW_PLAYER_CARD', () => {
-  it('should do nothing if the player is stood', () => {
+  it('do nothing if the player is stood', () => {
     expect(drawPlayerCardWithStoodPlayer.shoe.size).toEqual(storeWithStoodPlayer.shoe.size);
     const handBeforeAction = StoreUtils.getPlayerHand(
       storeWithStoodPlayer,
@@ -91,12 +92,12 @@ describe('DRAW_PLAYER_CARD', () => {
     expect(handBeforeAction.cards.size).toEqual(handAfterAction.cards.size);
   });
 
-  it('should do nothing if no cards are left', () => {
+  it('do nothing if no cards are left', () => {
     expect(StoreUtils.getPlayerHand(drawPlayerCardWithNoCards).cards.size)
       .toEqual(StoreUtils.getPlayerHand(storeWithNoCards).cards.size);
   });
 
-  it('should give the player a card from the shoe', () => {
+  it('give the player a card from the shoe', () => {
     expect(drawPlayerCardWithEnoughCards.shoe.size).toEqual(initializedShoe.shoe.size - 1);
     expect(StoreUtils.getPlayerHand(drawPlayerCardWithEnoughCards).cards.size)
       .toEqual(StoreUtils.getPlayerHand(initializedShoe).cards.size + 1);
@@ -104,56 +105,78 @@ describe('DRAW_PLAYER_CARD', () => {
 });
 
 describe('DRAW_DEALER_CARD', () => {
-  it('should do nothing if no cards are left', () => {
+  it('do nothing if no cards are left', () => {
     expect(drawDealerCardWithNoCards.dealerHand.cards.size).toEqual(storeWithNoCards.dealerHand.cards.size);
   });
 
-  it('should give the dealer a card from the shoe', () => {
+  it('give the dealer a card from the shoe', () => {
     expect(drawDealerCardWithEnoughCards.shoe.size).toEqual(initializedShoe.shoe.size - 1);
     expect(drawDealerCardWithEnoughCards.dealerHand.cards.size).toEqual(initializedShoe.dealerHand.cards.size + 1);
   });
 });
 
 describe('STAND', () => {
-  it('should stand the player', () => {
+  it('stand the player', () => {
     expect(standWithEnoughCards.playerHands.get(standWithEnoughCards.currentPlayerHand).stood).toEqual(true);
   });
 
-  it('should do nothing when the player is already stood', () => {
+  it('do nothing when the player is already stood', () => {
     expect(standWithStoodPlayer.playerHands.get(standWithStoodPlayer.currentPlayerHand).stood)
       .toEqual(storeWithStoodPlayer.playerHands.get(storeWithStoodPlayer.currentPlayerHand).stood);
   });
 });
 
 describe('STAND_DEALER', () => {
-  it('should stand the dealer', () => {
+  it('stand the dealer', () => {
     expect(reducer(startNewHandWithEnoughCards, standDealer()).dealerHand.stood).toEqual(true);
   });
 
-  it('should do nothing when the dealer is already stood', () => {
+  it('do nothing when the dealer is already stood', () => {
     expect(reducer(storeWithStoodDealer, standDealer()).dealerHand.stood)
       .toEqual(storeWithStoodDealer.dealerHand.stood);
   });
 });
 
 describe('REWARD_PLAYER', () => {
-  it('should take a betsize when player loses', () => {
-    expect(reducer(initializedShoe, rewardPlayer(GameUtils.HAND_RESULTS.LOSE)).bank)
-      .toEqual(initializedShoe.bank - initializedShoe.betSize);
-  });
-
-  it('should give a betsize when player wins', () => {
-    expect(reducer(initializedShoe, rewardPlayer(GameUtils.HAND_RESULTS.WIN)).bank)
+  it('give a betsize when player pushes', () => {
+    expect(reducer(initializedShoe, rewardPlayer(GameUtils.HAND_RESULTS.PUSH)).bank)
       .toEqual(initializedShoe.bank + initializedShoe.betSize);
   });
 
-  it('should take a betsize when player pushes', () => {
-    expect(reducer(initializedShoe, rewardPlayer(GameUtils.HAND_RESULTS.PUSH)).bank)
+  it('give two betsizes when player wins', () => {
+    expect(reducer(initializedShoe, rewardPlayer(GameUtils.HAND_RESULTS.WIN)).bank)
+      .toEqual(initializedShoe.bank + initializedShoe.betSize * 2);
+  });
+
+  it('do nothing when player loses', () => {
+    expect(reducer(initializedShoe, rewardPlayer(GameUtils.HAND_RESULTS.LOSE)).bank)
       .toEqual(initializedShoe.bank);
   });
 
-  it('should take a betsize when player gets blackjack', () => {
+  it('give a blackjack payout when player gets blackjack', () => {
     expect(reducer(initializedShoe, rewardPlayer(GameUtils.HAND_RESULTS.BLACKJACK)).bank)
-      .toEqual(initializedShoe.bank + (initializedShoe.betSize * 3 / 2));
+      .toEqual(initializedShoe.bank + (initializedShoe.betSize * 5 / 2));
   });
+});
+
+describe('DOUBLE', () => {
+  const playerHandBefore = StoreUtils.getPlayerHand(startNewHandWithEnoughCards);
+  const doubleHand = reducer(startNewHandWithEnoughCards, doubleHand());
+  const playerHandAfter = StoreUtils.getPlayerHand(doubleHand);
+  it('double the bet size of the hand', () => {
+    expect(playerHandAfter.bet).toEqual(playerHandBefore.bet * 2);
+  });
+
+  it('take away an extra bet from the bank', () => {
+    expect(doubleHand.bank).toEqual(startNewHandWithEnoughCards.bank - playerHandBefore.bet);
+  });
+
+  it('take an extra card', () => {
+    expect(playerHandAfter.cards.size).toEqual(playerHandBefore.cards.size + 1);
+  });
+
+  it('stands player hand', () => {
+    expect(playerHandBefore.stood).toEqual(false);
+    expect(playerHandAfter.stood).toEqual(true);
+  })
 });
