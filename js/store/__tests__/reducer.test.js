@@ -40,6 +40,18 @@ const drawDealerCardWithEnoughCards = reducer(initializedShoe, drawDealerCard())
 const standWithEnoughCards = reducer(startNewHandWithEnoughCards, stand());
 const standWithStoodPlayer = reducer(storeWithStoodPlayer, stand());
 
+describe('Unknown action', () => {
+  it('returns the same state on weird state', () => {
+    expect(reducer({ test: 'TEST' }, { type: undefined })).toEqual({ test: 'TEST' });
+  });
+});
+
+describe('Missing state', () => {
+  it('returns default state if no state given', () => {
+    expect(reducer(undefined, { type: undefined })).toEqual(defaultState);
+  });
+});
+
 describe('INITIALIZE_SHOE', () => {
   it('overwrite any existing shoe', () => {
     expect(Immutable.is(defaultState.shoe, initializedShoe.shoe)).toEqual(false);

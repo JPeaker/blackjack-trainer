@@ -38,7 +38,12 @@ class Game extends React.Component {
         <button onClick={this.props.startNewHand}>Start New Hand</button>
         <br />
         {
-          this.props.playerHands.map(hand => { return [<Hand key={Math.random()} hand={hand} />, hand.bet]; })
+          this.props.playerHands.map(hand => { return [
+            <Hand key={Math.random()} hand={hand} />,
+            <br />,
+            `Player hand value: ${HandUtils.getHandValue(hand)}`,
+            <br />,
+            `Bet size: ${hand.bet}`]; })
         }
         <br />
         <Hand hand={this.props.dealerHand} hideInitialCard={!this.props.stood} />
