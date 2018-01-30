@@ -36,7 +36,7 @@ class Controller {
       this.dispatch(stand());
       return;
     }
-
+    console.log(StoreUtils.allPlayerHandsStood(this.state));
     if (!StoreUtils.allPlayerHandsStood(this.state)) {
       if (HandUtils.getHandValue(StoreUtils.getPlayerHand(this.state)) >= 21) {
         this.dispatch(stand());
@@ -59,9 +59,10 @@ class Controller {
     }
 
     this.dispatch(standDealer());
-    this.dispatch(
-      rewardPlayer(GameUtils.scoreRound(StoreUtils.getPlayerHand(this.state, 0), this.state.dealerHand))
-    );
+    this.state.playerHands.forEach(hand => {
+      console.log(`REWARD! ${GameUtils.scoreRound(hand, this.state.dealerHand)}`);
+      this.dispatch(rewardPlayer(GameUtils.scoreRound(hand, this.state.dealerHand)));
+    });
   }
 }
 

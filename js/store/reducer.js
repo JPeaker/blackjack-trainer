@@ -43,7 +43,10 @@ export default function reducer(state = defaultState, action) {
       });
 
     case DRAW_PLAYER_CARD:
-      if (state.playerHands.get(state.currentPlayerHand).stood) {
+      if (
+        StoreUtils.allPlayerHandsStood(state) ||
+        state.playerHands.get(state.currentPlayerHand).stood
+      ) {
         return state;
       }
 
@@ -73,13 +76,17 @@ export default function reducer(state = defaultState, action) {
       return state;
 
     case STAND:
+      if (StoreUtils.allPlayerHandsStood(state)) {
+        return state;
+      }
+
       const standPlayerHand = StoreUtils.getPlayerHand(state);
       return Object.assign({}, state, {
         playerHands: state.playerHands.set(state.currentPlayerHand, Object.assign({}, standPlayerHand, {
           cards: state.playerHands.get(state.currentPlayerHand).cards,
           stood: true
         })),
-        currentPlayerHand: (state.currentPlayerHand + 1) % state.playerHands.size
+        currentPlayerHand: state.currentPlayerHand + 1
       });
 
     case STAND_DEALER:
@@ -127,6 +134,7 @@ export default function reducer(state = defaultState, action) {
       const splitPlayerHand = StoreUtils.getPlayerHand(state);
 
       if (
+        StoreUtils.allPlayerHandsStood(state) ||
         splitPlayerHand.cards.size !== 2 ||
         CardUtils.getCardValue(splitPlayerHand.cards.get(0)) !==
         CardUtils.getCardValue(splitPlayerHand.cards.get(1))
@@ -136,7 +144,8 @@ export default function reducer(state = defaultState, action) {
 
       return Object.assign({}, state, {
         playerHands: HandUtils.splitHand(state.currentPlayerHand, state.playerHands, state.shoe),
-        shoe: state.shoe.shift().shift()
+        shoe: state.shoe.shift().shift(),
+        bank: state.bank - splitPlayerHand.bet
       });
 
     default:

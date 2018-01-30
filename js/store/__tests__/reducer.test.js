@@ -130,6 +130,10 @@ describe('DRAW_PLAYER_CARD', () => {
       .toEqual(StoreUtils.getPlayerHand(storeWithNoCards).cards.size);
   });
 
+  it('does nothing if all hands are stood', () => {
+    expect(reducer(standWithStoodPlayer, drawPlayerCard())).toEqual(standWithStoodPlayer);
+  });
+
   it('give the player a card from the shoe', () => {
     expect(drawPlayerCardWithEnoughCards.shoe.size).toEqual(initializedShoe.shoe.size - 1);
     expect(StoreUtils.getPlayerHand(drawPlayerCardWithEnoughCards).cards.size)
@@ -150,7 +154,7 @@ describe('DRAW_DEALER_CARD', () => {
 
 describe('STAND', () => {
   it('stands the player', () => {
-    expect(standWithEnoughCards.playerHands.get(standWithEnoughCards.currentPlayerHand).stood).toEqual(true);
+    expect(standWithEnoughCards.playerHands.get(0).stood).toEqual(true);
   });
 
   it('increases current player hand if there is another hand waiting', () => {
@@ -231,10 +235,10 @@ describe('DOUBLE', () => {
 
 describe('SPLIT', () => {
   const sameCardShoeState = Object.assign({}, storeWithNoCards, {
-    shoe: Immutable.List(['8', '8', '8', '8', '8', '8', '8', '8'].map(card => CardUtils.generateCard(card)))
+    shoe: Immutable.List(['8', '8', '8', '8', '8', '8', '8', '8'].map(rank => CardUtils.generateCard(rank)))
   });
   const differentCardShoeState = Object.assign({}, storeWithNoCards, {
-    shoe: Immutable.List(['2', '3'].map(card => CardUtils.generateCard(card)))
+    shoe: Immutable.List(['2', '3'].map(rank => CardUtils.generateCard(rank)))
   });
 
   const handWithTwoOfSame = reducer(reducer(sameCardShoeState, drawPlayerCard()), drawPlayerCard());
@@ -252,8 +256,17 @@ describe('SPLIT', () => {
   });
 
   const splitHand = reducer(handWithTwoOfSame, split());
+  it('does nothing if all hands are stood', () => {
+    const standBothSplits = reducer(reducer(splitHand, stand()), stand());
+    expect(reducer(standBothSplits, split()).playerHands.size).toEqual(splitHand.playerHands.size);
+  });
+
   it('splits the first hand if there are just two of the same rank', () => {
     expect(splitHand.playerHands.size).toEqual(handWithTwoOfSame.playerHands.size + 1);
+  });
+
+  it('takes another bet size on split', () => {
+    expect(splitHand.bank).toEqual(handWithTwoOfSame.bank - handWithTwoOfSame.playerHands.get(0).bet);
   });
 
   it('draws a second card for the current hand on split, but not for the next hand', () => {
