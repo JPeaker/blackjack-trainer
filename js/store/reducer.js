@@ -48,7 +48,6 @@ export default function reducer(state = defaultState, action) {
         StoreUtils.allPlayerHandsStood(state) ||
         state.playerHands.get(state.currentPlayerHand).stood
       ) {
-        console.log('ALL STOOD');
         return state;
       }
 
