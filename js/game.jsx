@@ -20,7 +20,7 @@ class Game extends React.Component {
     return {
       dealerHand: PropTypes.object.isRequired,
       playerHands: PropTypes.instanceOf(Immutable.List).isRequired,
-      stood: PropTypes.bool.isRequired,
+      allPlayerHandsStood: PropTypes.bool.isRequired,
       bank: PropTypes.number.isRequired,
 
       hit: PropTypes.func.isRequired,
@@ -53,10 +53,10 @@ class Game extends React.Component {
           })
         }
         <br />
-        <Hand hand={this.props.dealerHand} hideInitialCard={!this.props.stood} />
-        <span>{this.props.stood ? HandUtils.getHandValue(this.props.dealerHand) : ''}</span>
+        <Hand hand={this.props.dealerHand} hideInitialCard={!this.props.allPlayerHandsStood} />
+        <span>{this.props.allPlayerHandsStood ? HandUtils.getHandValue(this.props.dealerHand) : ''}</span>
         <br />
-        <span>{!this.props.stood ? '' : GameUtils.scoreRound(this.props.playerHands.get(0), this.props.dealerHand)}</span>
+        <span>{!this.props.allPlayerHandsStood ? '' : GameUtils.scoreRound(this.props.playerHands.get(0), this.props.dealerHand)}</span>
         <br />
         <span>{this.props.bank}</span>
       </div>
@@ -67,7 +67,7 @@ class Game extends React.Component {
 const mapStateToProps = state => ({
   playerHands: state.playerHands,
   dealerHand: state.dealerHand,
-  stood: StoreUtils.getPlayerHand(state).stood,
+  allPlayerHandsStood: StoreUtils.allPlayerHandsStood(state),
   bank: state.bank
 });
 
