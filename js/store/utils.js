@@ -1,4 +1,21 @@
+import { List } from 'immutable';
+import defaultState from './default-state';
+
 export default class StoreUtils {
+  static generateTestStore(
+    hands = defaultState.playerHands,
+    currentPlayerHand = defaultState.currentPlayerHand,
+    dealerHand = defaultState.dealerHand,
+    shoe = defaultState.shoe
+  ) {
+    return Object.assign({}, defaultState, {
+      playerHands: List(hands),
+      currentPlayerHand,
+      dealerHand,
+      shoe
+    });
+  }
+
   static getPlayerHand(store, index = store.currentPlayerHand) {
     return store.playerHands.get(index);
   }

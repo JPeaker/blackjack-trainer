@@ -41,12 +41,10 @@ export default class GameUtils {
       return GameUtils.HAND_RESULTS.PUSH;
     }
 
-    if (dealerValue > playerValue) {
-      return GameUtils.HAND_RESULTS.LOSE;
-    }
-
     if (dealerValue < playerValue) {
       return GameUtils.HAND_RESULTS.WIN;
     }
+
+    return GameUtils.HAND_RESULTS.LOSE;
   }
 }

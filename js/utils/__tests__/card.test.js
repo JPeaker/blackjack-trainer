@@ -54,6 +54,8 @@ it('generates shoe correctly', () => {
 });
 
 describe('getCardValue()', () => {
+  expect(() => CardUtils.getCardValue({ rank: 'F', suit: 'hearts' })).toThrowError();
+
   const valueStringAsValue = (str, value) => {
     it(`values ${str} as ${value}`, () => {
       expect(CardUtils.getCardValue({ rank: str, suit: 'hearts' })).toEqual(value);

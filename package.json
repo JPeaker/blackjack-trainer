@@ -22,7 +22,7 @@
   },
   "scripts": {
     "webpack": "webpack --watch",
-    "test": "jest",
+    "test": "jest --coverage",
     "eslint": "eslint *"
   },
   "repository": {

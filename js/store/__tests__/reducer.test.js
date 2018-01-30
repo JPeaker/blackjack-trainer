@@ -9,15 +9,36 @@ import {
   stand,
   standDealer,
   rewardPlayer,
-  doubleHand
+  doubleHand,
+  split
 } from '../actions';
 import StoreUtils from '../utils';
+import CardUtils from '../../utils/card';
+import HandUtils from '../../utils/hand';
 import GameUtils from '../../utils/game';
 
 const initializedShoe = reducer(defaultState, initializeShoe());
-const storeWithNoCards = Object.assign({}, initializedShoe, { shoe: Immutable.List() });
+const initializedShoeDetermined = StoreUtils.generateTestStore(
+  undefined,
+  undefined,
+  undefined,
+  HandUtils.generateHand([
+    '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A',
+    '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A',
+    '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A',
+    '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'
+  ]).cards
+);
+
+const storeWithNoCards = StoreUtils.generateTestStore();
 
 const startNewHandWithEnoughCards = reducer(initializedShoe, startNewHand());
+const twoHandsSplittable = Object.assign({}, startNewHandWithEnoughCards, {
+  playerHands: startNewHandWithEnoughCards.playerHands.push(HandUtils.generateHand(['2', '2']))
+});
+const threeHandsSplittable = Object.assign({}, twoHandsSplittable, {
+  playerHands: twoHandsSplittable.playerHands.push(HandUtils.generateHand(['3', '3']))
+});
 
 const storeWithStoodPlayer = Object.assign({}, startNewHandWithEnoughCards, {
   playerHands: StoreUtils.standPlayerHand(startNewHandWithEnoughCards)
@@ -39,6 +60,18 @@ const drawDealerCardWithEnoughCards = reducer(initializedShoe, drawDealerCard())
 
 const standWithEnoughCards = reducer(startNewHandWithEnoughCards, stand());
 const standWithStoodPlayer = reducer(storeWithStoodPlayer, stand());
+
+describe('Unknown action', () => {
+  it('returns the same state on weird state', () => {
+    expect(reducer({ test: 'TEST' }, { type: undefined })).toEqual({ test: 'TEST' });
+  });
+});
+
+describe('Missing state', () => {
+  it('returns default state if no state given', () => {
+    expect(reducer(undefined, { type: undefined })).toEqual(defaultState);
+  });
+});
 
 describe('INITIALIZE_SHOE', () => {
   it('overwrite any existing shoe', () => {
@@ -74,6 +107,10 @@ describe('START_NEW_HAND', () => {
   it('stop the dealer being stood', () => {
     expect(startNewHandWithStoodDealer.dealerHand.stood).toEqual(false);
   });
+
+  it('sets currentPlayerHand to 0', () => {
+    expect(startNewHandWithStoodDealer.currentPlayerHand).toEqual(0);
+  });
 });
 
 describe('DRAW_PLAYER_CARD', () => {
@@ -97,6 +134,10 @@ describe('DRAW_PLAYER_CARD', () => {
       .toEqual(StoreUtils.getPlayerHand(storeWithNoCards).cards.size);
   });
 
+  it('does nothing if all hands are stood', () => {
+    expect(reducer(standWithStoodPlayer, drawPlayerCard())).toEqual(standWithStoodPlayer);
+  });
+
   it('give the player a card from the shoe', () => {
     expect(drawPlayerCardWithEnoughCards.shoe.size).toEqual(initializedShoe.shoe.size - 1);
     expect(StoreUtils.getPlayerHand(drawPlayerCardWithEnoughCards).cards.size)
@@ -116,11 +157,16 @@ describe('DRAW_DEALER_CARD', () => {
 });
 
 describe('STAND', () => {
-  it('stand the player', () => {
-    expect(standWithEnoughCards.playerHands.get(standWithEnoughCards.currentPlayerHand).stood).toEqual(true);
+  it('stands the player', () => {
+    expect(standWithEnoughCards.playerHands.get(0).stood).toEqual(true);
   });
 
-  it('do nothing when the player is already stood', () => {
+  it('increases current player hand if there is another hand waiting', () => {
+    expect(twoHandsSplittable.currentPlayerHand).toEqual(0);
+    expect(reducer(twoHandsSplittable, stand()).currentPlayerHand).toEqual(1);
+  });
+
+  it('does nothing when the player is already stood', () => {
     expect(standWithStoodPlayer.playerHands.get(standWithStoodPlayer.currentPlayerHand).stood)
       .toEqual(storeWithStoodPlayer.playerHands.get(storeWithStoodPlayer.currentPlayerHand).stood);
   });
@@ -161,14 +207,14 @@ describe('REWARD_PLAYER', () => {
 
 describe('DOUBLE', () => {
   const playerHandBefore = StoreUtils.getPlayerHand(startNewHandWithEnoughCards);
-  const doubleHand = reducer(startNewHandWithEnoughCards, doubleHand());
-  const playerHandAfter = StoreUtils.getPlayerHand(doubleHand);
+  const stateAfterDouble = reducer(startNewHandWithEnoughCards, doubleHand());
+  const playerHandAfter = StoreUtils.getPlayerHand(stateAfterDouble, stateAfterDouble.currentPlayerHand - 1);
   it('double the bet size of the hand', () => {
     expect(playerHandAfter.bet).toEqual(playerHandBefore.bet * 2);
   });
 
   it('take away an extra bet from the bank', () => {
-    expect(doubleHand.bank).toEqual(startNewHandWithEnoughCards.bank - playerHandBefore.bet);
+    expect(stateAfterDouble.bank).toEqual(startNewHandWithEnoughCards.bank - playerHandBefore.bet);
   });
 
   it('take an extra card', () => {
@@ -179,4 +225,66 @@ describe('DOUBLE', () => {
     expect(playerHandBefore.stood).toEqual(false);
     expect(playerHandAfter.stood).toEqual(true);
   })
+
+  it('does nothing if the hand has more than two cards', () => {
+    const multiCardHand = reducer(startNewHandWithEnoughCards, drawPlayerCard());
+    const multiCardHandAfter = reducer(multiCardHand, doubleHand());
+    expect(multiCardHand).toEqual(multiCardHandAfter);
+  });
+
+  it('does nothing if all player hands are stood', () => {
+    expect(reducer(storeWithStoodPlayer, doubleHand())).toEqual(storeWithStoodPlayer);
+  });
+});
+
+describe('SPLIT', () => {
+  const sameCardShoeState = Object.assign({}, storeWithNoCards, {
+    shoe: Immutable.List(['8', '8', '8', '8', '8', '8', '8', '8'].map(rank => CardUtils.generateCard(rank)))
+  });
+  const differentCardShoeState = Object.assign({}, storeWithNoCards, {
+    shoe: Immutable.List(['2', '3'].map(rank => CardUtils.generateCard(rank)))
+  });
+
+  const handWithTwoOfSame = reducer(reducer(sameCardShoeState, drawPlayerCard()), drawPlayerCard());
+
+  it('does nothing if the hand has too many cards', () => {
+    const handWithThreeOfSame = reducer(handWithTwoOfSame, drawPlayerCard());
+    expect(reducer(handWithThreeOfSame, split())).toEqual(handWithThreeOfSame);
+    expect(handWithThreeOfSame.playerHands.size).toEqual(handWithTwoOfSame.playerHands.size);
+  });
+
+  it('does nothing if the hand does not have the same ranks', () => {
+    const handWithDifferentRanks = reducer(reducer(differentCardShoeState, drawPlayerCard()), drawPlayerCard());
+    expect(reducer(handWithDifferentRanks, split())).toEqual(handWithDifferentRanks);
+    expect(reducer(handWithDifferentRanks, split()).playerHands.size).toEqual(handWithDifferentRanks.playerHands.size);
+  });
+
+  const splitHand = reducer(handWithTwoOfSame, split());
+  it('does nothing if all hands are stood', () => {
+    const standBothSplits = reducer(reducer(splitHand, stand()), stand());
+    expect(reducer(standBothSplits, split()).playerHands.size).toEqual(splitHand.playerHands.size);
+  });
+
+  it('splits the first hand if there are just two of the same rank', () => {
+    expect(splitHand.playerHands.size).toEqual(handWithTwoOfSame.playerHands.size + 1);
+  });
+
+  it('takes another bet size on split', () => {
+    expect(splitHand.bank).toEqual(handWithTwoOfSame.bank - handWithTwoOfSame.playerHands.get(0).bet);
+  });
+
+  it('draws a second card for the current hand on split, but not for the next hand', () => {
+    expect(splitHand.playerHands.get(splitHand.currentPlayerHand).cards.size).toEqual(2);
+    expect(splitHand.playerHands.get(splitHand.currentPlayerHand + 1).cards.size).toEqual(2);
+  });
+
+  it('splits a middle hand if it should', () => {
+    const splitMiddleHand = reducer(reducer(threeHandsSplittable, stand()), split());
+    expect(splitMiddleHand.currentPlayerHand).toEqual(1);
+    expect(splitMiddleHand.playerHands.size).toEqual(4);
+    // Make sure it's the 2 hand, not the 3 hand
+    expect(splitMiddleHand.playerHands.get(splitMiddleHand.currentPlayerHand).cards.get(0).rank).toEqual('2');
+    expect(splitMiddleHand.playerHands.get(splitMiddleHand.currentPlayerHand + 1).cards.get(0).rank).toEqual('2');
+    expect(splitMiddleHand.playerHands.get(splitMiddleHand.currentPlayerHand + 2).cards.get(0).rank).toEqual('3');
+  });
 });
