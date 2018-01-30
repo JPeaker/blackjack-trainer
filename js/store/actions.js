@@ -2,6 +2,7 @@ export const INITIALIZE_SHOE = 'INITIALIZE_SHOE';
 export const DRAW_PLAYER_CARD = 'DRAW_PLAYER_CARD';
 export const DRAW_DEALER_CARD = 'DRAW_DEALER_CARD';
 export const DOUBLE = 'DOUBLE';
+export const SPLIT = 'SPLIT';
 export const STAND = 'STAND';
 export const START_NEW_HAND = 'START_NEW_HAND';
 export const STAND_DEALER = 'STAND_DEALER';
@@ -54,4 +55,11 @@ export function doubleHand() {
   return {
     type: DOUBLE
   };
+}
+
+export function split(x) {
+  return {
+    type: SPLIT,
+    x
+  }
 }

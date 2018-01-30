@@ -1,6 +1,7 @@
 import { List } from 'immutable';
 import defaultState from './default-state';
 import CardUtils from '../utils/card';
+import HandUtils from '../utils/hand';
 import GameUtils from '../utils/game';
 import StoreUtils from '../store/utils';
 import {
@@ -11,7 +12,8 @@ import {
   STAND_DEALER,
   STAND,
   REWARD_PLAYER,
-  DOUBLE
+  DOUBLE,
+  SPLIT
 } from './actions';
 
 export default function reducer(state = defaultState, action) {
@@ -28,7 +30,7 @@ export default function reducer(state = defaultState, action) {
 
       return Object.assign({}, state, {
         playerHands: List([{
-          cards: List([state.shoe.get(0), state.shoe.get(1)]),
+          cards: List([{ rank: '4', suit: 'spades' }, { rank: '4', suit: 'spades' }]),
           bet: state.betSize,
           stood: false
         }]),
@@ -117,7 +119,24 @@ export default function reducer(state = defaultState, action) {
           })
         ),
         shoe: state.shoe.shift(),
+        currentPlayerHand: state.currentPlayerHand + 1,
         bank: state.bank - doublePlayerHand.bet
+      });
+
+    case SPLIT:
+      const splitPlayerHand = StoreUtils.getPlayerHand(state);
+
+      if (
+        splitPlayerHand.cards.size !== 2 ||
+        CardUtils.getCardValue(splitPlayerHand.cards.get(0)) !==
+        CardUtils.getCardValue(splitPlayerHand.cards.get(1))
+      ) {
+        return state;
+      }
+
+      return Object.assign({}, state, {
+        playerHands: HandUtils.splitHand(state.currentPlayerHand, state.playerHands, state.shoe),
+        shoe: state.shoe.shift().shift()
       });
 
     default:

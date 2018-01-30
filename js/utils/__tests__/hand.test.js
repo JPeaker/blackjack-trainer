@@ -131,3 +131,22 @@ describe('isBlackjack()', () => {
     expectIsBlackjackToBe(['9', '8', '4'], false);
   });
 });
+
+describe('splitHand()', () => {
+  const firstEight = { rank: '8', suit: 'spades' };
+  const secondEight = { rank: '8', suit: 'diamonds' };
+  const firstRandomCard = { rank: '3', suit: 'clubs' };
+  const secondRandomCard = { rank: '4', suit: 'hearts' };
+  const hands = List([ { cards: List([firstEight, secondEight]), stood: false, bet: 10 } ]);
+  const shoe = List([ firstRandomCard, secondRandomCard ]);
+
+  it('works correctly', () => {
+    const split = HandUtils.splitHand(0, hands, shoe);
+    expect(split.get(0).cards).toEqual(List([ firstEight, firstRandomCard ]));
+    expect(split.get(0).stood).toEqual(false);
+    expect(split.get(0).bet).toEqual(hands.get(0).bet);
+    expect(split.get(1).cards).toEqual(List([ secondEight, secondRandomCard ]));
+    expect(split.get(1).stood).toEqual(false);
+    expect(split.get(1).bet).toEqual(hands.get(0).bet);
+  });
+});

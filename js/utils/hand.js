@@ -35,4 +35,20 @@ export default class HandUtils {
   static isBlackjack(hand) {
     return hand.cards.size === 2 && HandUtils.getHandValue(hand) === 21;
   }
+
+  static splitHand(handIndex, hands, shoe) {
+    const currentPlayerHand = hands.get(handIndex);
+
+    return hands
+      .set(handIndex, {
+        cards: List([ currentPlayerHand.cards.get(0), shoe.get(0) ]),
+        stood: false,
+        bet: currentPlayerHand.bet
+      })
+      .insert(handIndex + 1, {
+        cards: List([ currentPlayerHand.cards.get(1), shoe.get(1) ]),
+        stood: false,
+        bet: currentPlayerHand.bet
+      });
+  }
 }

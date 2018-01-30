@@ -12,6 +12,7 @@ import {
   doubleHand,
   stand,
   startNewHand,
+  split
 } from './store/actions';
 
 class Game extends React.Component {
@@ -35,15 +36,21 @@ class Game extends React.Component {
         <button onClick={this.props.hit}>Hit</button>
         <button onClick={this.props.stand}>Stand</button>
         <button onClick={this.props.doubleHand}>Double</button>
+        <button onClick={this.props.split}>Split</button>
         <button onClick={this.props.startNewHand}>Start New Hand</button>
         <br />
         {
-          this.props.playerHands.map(hand => { return [
-            <Hand key={Math.random()} hand={hand} />,
-            <br />,
-            `Player hand value: ${HandUtils.getHandValue(hand)}`,
-            <br />,
-            `Bet size: ${hand.bet}`]; })
+          this.props.playerHands.map(hand => {
+            return [
+              <Hand key={Math.random()} hand={hand} />,
+              <br />,
+              `Player hand value: ${HandUtils.getHandValue(hand)}\t`,
+              hand.stood ? 'STOOD' : 'TO BE PLAYED',
+              <br />,
+              `Bet size: ${hand.bet}`,
+              <br />
+            ];
+          })
         }
         <br />
         <Hand hand={this.props.dealerHand} hideInitialCard={!this.props.stood} />
@@ -68,7 +75,8 @@ const mapDispatchToProps = dispatch => ({
   hit: () => { dispatch(drawPlayerCard()); },
   doubleHand: () => { dispatch(doubleHand()); },
   stand: () => { dispatch(stand()); },
-  startNewHand: () => { dispatch(startNewHand()); }
+  startNewHand: () => { dispatch(startNewHand()); },
+  split: () => { dispatch(split()); }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Game);

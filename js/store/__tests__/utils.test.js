@@ -9,16 +9,38 @@ const dealerHand = HandUtils.generateHand(['5'])
 
 const standHand = (hand) => Object.assign({}, hand, { stood: true });
 
-const generateStore = (hands, currentPlayerHand = 0, dealerHand = List()) => ({
-  playerHands: List(hands),
-  currentPlayerHand,
-  dealerHand
+describe('generateTestStore()', () => {
+  it('defaults correctly', () => {
+    const defaultStore = StoreUtils.generateTestStore();
+    expect(List.isList(defaultStore.playerHands) && defaultStore.playerHands.get(0).cards.size === 0).toEqual(true);
+    expect(List.isList(defaultStore.dealerHand.cards) && defaultStore.dealerHand.cards.size === 0).toEqual(true);
+    expect(List.isList(defaultStore.shoe) && defaultStore.shoe.size === 0).toEqual(true);
+    expect(defaultStore.currentPlayerHand).toEqual(0);
+  });
+
+  it('sets correctly', () => {
+    // Player hands is not in the right format, but we don't really care here
+    const setsCorrectlyPlayerHands = List([1, 2, 3]);
+    const setsCorrectlyDealerHand = List([4, 5, 6]);
+    const setsCorrectlyShoe = List([7, 8, 9]);
+    const setCorrectly = StoreUtils.generateTestStore(
+      setsCorrectlyPlayerHands,
+      1,
+      setsCorrectlyDealerHand,
+      setsCorrectlyShoe
+    );
+
+    expect(setCorrectly.playerHands).toEqual(setsCorrectlyPlayerHands);
+    expect(setCorrectly.currentPlayerHand).toEqual(1);
+    expect(setCorrectly.dealerHand).toEqual(setsCorrectlyDealerHand);
+    expect(setCorrectly.shoe).toEqual(setsCorrectlyShoe);
+  });
 });
 
-const storeIndexZero = generateStore([hand1, hand2, hand3], 0, dealerHand);
-const storeIndexOne = generateStore([hand1, hand2, hand3], 1, dealerHand);
-const storeIndexTwo = generateStore([hand1, hand2, hand3], 2, dealerHand);
-const allHandsStood = generateStore([hand1, hand2, hand3], 3, dealerHand);
+const storeIndexZero = StoreUtils.generateTestStore([hand1, hand2, hand3], 0, dealerHand);
+const storeIndexOne = StoreUtils.generateTestStore([hand1, hand2, hand3], 1, dealerHand);
+const storeIndexTwo = StoreUtils.generateTestStore([hand1, hand2, hand3], 2, dealerHand);
+const allHandsStood = StoreUtils.generateTestStore([hand1, hand2, hand3], 3, dealerHand);
 
 describe('getPlayerHand()', () => {
   it('get the correct hand', () => {
@@ -101,7 +123,7 @@ describe('standDealerHand()', () => {
 describe('allPlayerHandsStood()', () => {
   const testListAndExpect = (list, expectToBe) => {
     it('give ${expectToBe} on ${list}', () => {
-      expect(StoreUtils.allPlayerHandsStood(generateStore(list))).toEqual(expectToBe);
+      expect(StoreUtils.allPlayerHandsStood(StoreUtils.generateTestStore(list))).toEqual(expectToBe);
     });
   }
 

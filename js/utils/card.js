@@ -11,11 +11,11 @@ export default class CardUtils {
 
   static generateCard(rank, suit = 'spades') {
     if (CardUtils.ranks.indexOf(rank) === -1) {
-      throw new Error('Invalid card rank');
+      throw new Error(`Invalid card rank ${rank}`);
     }
 
     if (CardUtils.suits.indexOf(suit) === -1) {
-      throw new Error('Invalid card suit');
+      throw new Error(`Invalid card suit ${suit}`);
     }
 
     return { rank, suit };
