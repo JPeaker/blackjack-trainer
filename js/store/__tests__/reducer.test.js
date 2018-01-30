@@ -107,6 +107,10 @@ describe('START_NEW_HAND', () => {
   it('stop the dealer being stood', () => {
     expect(startNewHandWithStoodDealer.dealerHand.stood).toEqual(false);
   });
+
+  it('sets currentPlayerHand to 0', () => {
+    expect(startNewHandWithStoodDealer.currentPlayerHand).toEqual(0);
+  });
 });
 
 describe('DRAW_PLAYER_CARD', () => {

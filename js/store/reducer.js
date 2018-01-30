@@ -30,7 +30,7 @@ export default function reducer(state = defaultState, action) {
 
       return Object.assign({}, state, {
         playerHands: List([{
-          cards: List([{ rank: '4', suit: 'spades' }, { rank: '4', suit: 'spades' }]),
+          cards: List([state.shoe.get(0), state.shoe.get(1)]),
           bet: state.betSize,
           stood: false
         }]),
@@ -39,6 +39,7 @@ export default function reducer(state = defaultState, action) {
           stood: false
         },
         shoe: state.shoe.shift().shift().shift().shift(),
+        currentPlayerHand: 0,
         bank: state.bank - state.betSize
       });
 
@@ -47,6 +48,7 @@ export default function reducer(state = defaultState, action) {
         StoreUtils.allPlayerHandsStood(state) ||
         state.playerHands.get(state.currentPlayerHand).stood
       ) {
+        console.log('ALL STOOD');
         return state;
       }
 
@@ -66,9 +68,9 @@ export default function reducer(state = defaultState, action) {
     case DRAW_DEALER_CARD:
       if (state.shoe.size > 0) {
         return Object.assign({}, state, {
-          dealerHand: {
+          dealerHand: Object.assign({}, state.dealerHand, {
             cards: state.dealerHand.cards.push(state.shoe.get(0))
-          },
+          }),
           shoe: state.shoe.shift()
         });
       }
@@ -96,15 +98,21 @@ export default function reducer(state = defaultState, action) {
 
     case REWARD_PLAYER:
       if (action.roundResult === GameUtils.HAND_RESULTS.PUSH) {
-        return Object.assign({}, state, { bank: state.bank + StoreUtils.getPlayerHand(state).bet });
+        return Object.assign({}, state, {
+          bank: state.bank + StoreUtils.getPlayerHand(state, action.handIndex).bet
+        });
       }
 
       if (action.roundResult === GameUtils.HAND_RESULTS.WIN) {
-        return Object.assign({}, state, { bank: state.bank + StoreUtils.getPlayerHand(state).bet * 2 });
+        return Object.assign({}, state, {
+          bank: state.bank + StoreUtils.getPlayerHand(state, action.handIndex).bet * 2
+        });
       }
 
       if (action.roundResult === GameUtils.HAND_RESULTS.BLACKJACK) {
-        return Object.assign({}, state, { bank: state.bank + (StoreUtils.getPlayerHand(state).bet * ((3 / 2) + 1)) });
+        return Object.assign({}, state, {
+          bank: state.bank + (StoreUtils.getPlayerHand(state, action.handIndex).bet * ((3 / 2) + 1))
+        });
       }
 
       return state;

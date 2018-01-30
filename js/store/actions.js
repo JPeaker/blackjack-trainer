@@ -44,10 +44,11 @@ export function startNewHand() {
   };
 }
 
-export function rewardPlayer(roundResult) {
+export function rewardPlayer(roundResult, handIndex) {
   return {
     type: REWARD_PLAYER,
-    roundResult
+    roundResult,
+    handIndex
   };
 }
 
@@ -57,9 +58,8 @@ export function doubleHand() {
   };
 }
 
-export function split(x) {
+export function split() {
   return {
-    type: SPLIT,
-    x
+    type: SPLIT
   }
 }
